@@ -87,10 +87,10 @@ export const LayeredMapModal: React.FC<Props> = ({
   onStartEva,
 }) => {
   const [on, setOn] = useState<Record<string, boolean>>({
-    imagery: true,
+    imagery: false,
     hillshade: true,
     slope: false,
-    hazard: true,
+    hazard: false,
     chemical: false,
     geology: true,
     rover: true,
@@ -143,9 +143,13 @@ export const LayeredMapModal: React.FC<Props> = ({
         ? {
             ...Object.fromEntries(raster.layers.map((l) => [l.key, { on: false, opacity: l.default_opacity }])),
             ...saved,
-            orthomosaic: { on: true, opacity: saved?.orthomosaic?.opacity ?? 1 },
+            orthomosaic: { on: false, opacity: saved?.orthomosaic?.opacity ?? 1 },
+            hazard: { on: false, opacity: saved?.hazard?.opacity ?? 1 },
           }
-        : Object.fromEntries(raster.layers.map((l) => [l.key, { on: l.default_on, opacity: l.default_opacity }]))
+        : Object.fromEntries(raster.layers.map((l) => [
+            l.key,
+            { on: l.key === 'orthomosaic' || l.key === 'hazard' ? false : l.default_on, opacity: l.default_opacity },
+          ]))
     );
     setProbe(null);
   }, [meta?.id]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -747,6 +751,7 @@ export const LayeredMapModal: React.FC<Props> = ({
               <RasterMap
                 meta={meta}
                 layerState={lay}
+                backgroundImage="/images/JezoroCrater.jpg"
                 cursor={mode !== 'inspect' ? 'crosshair' : 'grab'}
                 onPick={onRasterPick}
                 popup={
@@ -814,7 +819,7 @@ export const LayeredMapModal: React.FC<Props> = ({
                           </g>
                         );
                       })}
-                    {m.hazards.map((h) => {
+                    {on.hazard && m.hazards.map((h) => {
                       const q = pos(h.lat, h.lon);
                       return (
                         <circle
@@ -829,7 +834,7 @@ export const LayeredMapModal: React.FC<Props> = ({
                         />
                       );
                     })}
-                    {m.obstacles.map((o, i) => {
+                    {on.hazard && m.obstacles.map((o, i) => {
                       const q = pos(o.lat, o.lon);
                       return (
                         <circle
@@ -966,6 +971,12 @@ export const LayeredMapModal: React.FC<Props> = ({
                 mode !== 'inspect' ? 'cursor-crosshair' : ''
               }`}
             >
+              <img
+                src="/images/JezoroCrater.jpg"
+                alt="Jezero Crater surface map"
+                className="absolute inset-0 w-full h-full object-fill [image-rendering:auto]"
+                draggable={false}
+              />
               {meta.layer_urls.imagery && on.imagery && (
                 <img
                   src={api.assetUrl(meta.layer_urls.imagery)}
@@ -1054,7 +1065,7 @@ export const LayeredMapModal: React.FC<Props> = ({
                       </g>
                     );
                   })}
-                {m.hazards.map((h) => {
+                {on.hazard && m.hazards.map((h) => {
                   const q = pos(h.lat, h.lon);
                   return (
                     <circle
@@ -1069,7 +1080,7 @@ export const LayeredMapModal: React.FC<Props> = ({
                     />
                   );
                 })}
-                {m.obstacles.map((o, i) => {
+                {on.hazard && m.obstacles.map((o, i) => {
                   const q = pos(o.lat, o.lon);
                   return (
                     <circle

@@ -11,6 +11,7 @@ export type LayerState = Record<string, { on: boolean; opacity: number }>;
 interface Props {
   meta: RegionMeta;
   layerState: LayerState;
+  backgroundImage?: string;
   cursor?: string;
   onPick: (p: { lat: number; lon: number; fx: number; fy: number; px: number; py: number }) => void;
   /** SVG overlay drawn in a 0..1000 (x) by 0..vbH (y) box. `s` = 1/zoom so markers keep their screen size. */
@@ -20,7 +21,7 @@ interface Props {
 }
 
 /** Pan / zoom viewer that loads only the map tiles on screen (fast for huge GeoTIFFs). Wheel = zoom, drag = move, click = pick. */
-export const RasterMap: React.FC<Props> = ({ meta, layerState, cursor, onPick, overlay, popup, onViewChange }) => {
+export const RasterMap: React.FC<Props> = ({ meta, layerState, backgroundImage, cursor, onPick, overlay, popup, onViewChange }) => {
   const rm = meta.raster!;
   const box = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 800, h: 600 });
@@ -112,6 +113,14 @@ export const RasterMap: React.FC<Props> = ({ meta, layerState, cursor, onPick, o
     <div ref={box} className="relative w-full h-full overflow-hidden select-none bg-[#0b0608]" style={{ cursor: cursor ?? 'grab' }}
       onMouseDown={onDown} onMouseMove={onMove} onMouseUp={onUp} onMouseLeave={() => { drag.current = null; }}>
       <div className="absolute left-0 top-0 origin-top-left" style={{ width: baseW, height: baseH, transform: `translate(${view.tx}px, ${view.ty}px) scale(${view.k})`, willChange: 'transform' }}>
+        {backgroundImage && (
+          <img
+            src={backgroundImage}
+            alt="Jezero Crater surface map"
+            draggable={false}
+            className="absolute inset-0 w-full h-full object-fill"
+          />
+        )}
         {active.map((l) => (
           <div key={l.key} className="absolute inset-0 overflow-hidden pointer-events-none"
             style={{ opacity: layerState[l.key].opacity, mixBlendMode: (l.blend as React.CSSProperties['mixBlendMode']) ?? 'normal' }}>

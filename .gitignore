@@ -15,5 +15,4 @@ data/processed/*
 backend/app/data/cache/
 backend/app/data/rasters/*.tif
 backend/app/data/rasters/*.ovr
-frontend/public/sounds/*.mp3
 frontend/public/sounds/*.wav

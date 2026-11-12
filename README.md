@@ -14,7 +14,7 @@ prompt.md  master prompt for an AI coding agent to finish the project
 ```bash
 pip install -r backend/requirements.txt -r data/requirements.txt
 python data/scripts/run_all.py --full-demo   # writes demo_synthetic + jezero_delta + the 5 bd_* craters (ALL SYNTHETIC, labelled)
-(cd backend && uvicorn app.main:app --port 8000) &
+(cd backend && python -m uvicorn app.main:app --port 8000) &
 (cd frontend && cp .env.example .env.local && npm install && npm run dev)   # http://localhost:3000
 ```
 Real data: see `docs/DATA_SOURCES.md` then `python data/scripts/run_all.py --region jezero_delta`.

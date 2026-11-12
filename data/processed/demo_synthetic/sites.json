@@ -1,0 +1,38 @@
+[
+  {
+    "id": "demo0",
+    "name": "Demo Habitat",
+    "lat": 18.419388185425653,
+    "lon": 77.37711182689881,
+    "goal": "Start / base",
+    "description": "SYNTHETIC placeholder, not a real Martian feature.",
+    "mission": "none (synthetic)",
+    "observed": "n/a",
+    "source_url": "",
+    "pov_images": []
+  },
+  {
+    "id": "demo1",
+    "name": "Demo Science Site A",
+    "lat": 18.456503516113507,
+    "lon": 77.43045052863987,
+    "goal": "Demo layered-rock target",
+    "description": "SYNTHETIC placeholder, not a real Martian feature.",
+    "mission": "none (synthetic)",
+    "observed": "n/a",
+    "source_url": "",
+    "pov_images": []
+  },
+  {
+    "id": "demo2",
+    "name": "Demo Science Site B",
+    "lat": 18.419388185425653,
+    "lon": 77.43222848536456,
+    "goal": "Demo second target",
+    "description": "SYNTHETIC placeholder, not a real Martian feature.",
+    "mission": "none (synthetic)",
+    "observed": "n/a",
+    "source_url": "",
+    "pov_images": []
+  }
+]

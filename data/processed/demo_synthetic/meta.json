@@ -1,0 +1,48 @@
+{
+  "id": "demo_synthetic",
+  "name": "DEMO (synthetic) - NOT NASA DATA",
+  "role": "demo",
+  "synthetic": true,
+  "science_goal": "UI/API development only",
+  "center": {
+    "lat": 18.43625879028377,
+    "lon": 77.40555913449404
+  },
+  "coord_status": "synthetic",
+  "grid": {
+    "width": 200,
+    "height": 200,
+    "cell_m": 20.0,
+    "north_lat": 18.47,
+    "west_lon": 77.37
+  },
+  "layers": [
+    {
+      "kind": "topographic",
+      "name": "Synthetic terrain",
+      "mission": "none",
+      "instrument": "numpy",
+      "product": "make_demo_region.py",
+      "resolution_m": 20.0,
+      "acquired": "n/a",
+      "nature": "static",
+      "source_url": "",
+      "limitation": "Randomly generated. Never show as real."
+    },
+    {
+      "kind": "optical",
+      "name": "Synthetic imagery",
+      "mission": "none",
+      "instrument": "numpy",
+      "product": "make_demo_region.py",
+      "resolution_m": 20.0,
+      "acquired": "n/a",
+      "nature": "static",
+      "source_url": "",
+      "limitation": "Randomly generated."
+    }
+  ],
+  "warnings": [
+    "SYNTHETIC DATA - NOT NASA DATA. For development only."
+  ]
+}

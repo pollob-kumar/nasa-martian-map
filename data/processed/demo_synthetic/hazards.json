@@ -1,0 +1,11 @@
+[
+  {
+    "id": "hz0",
+    "name": "Demo boulder field",
+    "lat": 18.443007032227015,
+    "lon": 77.40555913449404,
+    "radius_m": 150,
+    "reason": "synthetic",
+    "source_url": ""
+  }
+]

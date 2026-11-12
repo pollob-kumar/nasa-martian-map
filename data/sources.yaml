@@ -1,0 +1,13 @@
+# Candidate NASA/USGS sources. Run `python scripts/00_verify_sources.py` on a machine with internet FIRST.
+# Status column = what we could (not) verify when this toolkit was written.
+sources:
+  - {id: mars_trek,        kind: portal,   url: "https://trek.nasa.gov/mars/",                       use: "browse layers, export subsets, copy WMTS layer names"}
+  # The former api.nasa.gov/mars-wmts/catalog endpoint returned 404 on 2026-10-31.
+  # Do not use it as a download dependency; inspect/export layers through Mars Trek.
+  - {id: gazetteer,        kind: portal,   url: "https://planetarynames.wr.usgs.gov/",                use: "official crater names + coordinates (Bangladesh craters)"}
+  - {id: usgs_mars,        kind: portal,   url: "https://www.usgs.gov/search?keywords=Mars",          use: "USGS Mars data/maps (geologic maps, DEM downloads)"}
+  - {id: usgs_astrogeo,    kind: portal,   url: "https://astrogeology.usgs.gov/",                     use: "Astrogeology Science Center: Mars DEM/mosaic downloads, geologic mapping program"}
+  - {id: hirise_dtm,       kind: portal,   url: "https://www.uahirise.org/dtm/",                      use: "HiRISE digital terrain models (only for selected sites)"}
+  - {id: pds_geosciences,  kind: archive,  url: "https://pds-geosciences.wustl.edu/",                 use: "MOLA / CTX / HRSC / rover data archives"}
+  - {id: mars2020_raw,     kind: portal,   url: "https://mars.nasa.gov/mars2020/multimedia/raw-images/", use: "Perseverance raw images = POV images"}
+  - {id: nasa_open_api,    kind: api,      url: "https://api.nasa.gov/",                              use: "free API key; some Mars endpoints may be down -> never depend on a single one"}

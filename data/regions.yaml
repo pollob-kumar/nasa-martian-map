@@ -1,0 +1,58 @@
+# One entry = one map region the app can show.
+# lon is degrees EAST, 0-360 (planetocentric, same as USGS Gazetteer).
+# size_km = side of the square box we cut out. cell_m = output grid spacing (must not be finer than the real DEM!).
+regions:
+  - id: jezero_delta
+    name: "Jezero Crater - Western Delta (PRIMARY)"
+    role: primary
+    center: { lat: 18.45, lon: 77.42 } # VERIFY on Mars Trek; adjust so landing site + delta are inside
+    size_km: 20
+    cell_m: 463 # USGS MOLA global DEM nominal pixel spacing
+    science_goal: "Study delta deposits and sampled rocks along a planned Marswalk"
+    dem:
+      {
+        file: "data/raw/jezero_dem.tif",
+        product: "MGS MOLA global DEM mosaic crop",
+        mission: "Mars Global Surveyor",
+        instrument: "MOLA",
+        resolution_m: 463,
+        acquired: "multi-year orbital mapping",
+        url: "https://planetarymaps.usgs.gov/mosaic/Mars_MGS_MOLA_DEM_mosaic_global_463m.tif",
+        limitation: "Coarse global fallback; local landforms and hazards smaller than the source pixel are unresolved.",
+      }
+    image: {file: "data/raw/jezero_image.tif", product: "MISSING: verified CTX or HiRISE orthoimage", mission: "MISSING", resolution_m: 0}
+  - id: bd_bogra
+    name: "Bogra crater (Bangladesh name)"
+    role: bangladesh
+    center: { lat: -24.4, lon: 331.1 }
+    coord_status: approx_needs_verify # derived from planetographic W longitude
+    size_km: 70
+    cell_m: 200
+  - id: bd_sripur
+    name: "Sripur crater (Bangladesh name)"
+    role: bangladesh
+    center: { lat: -31.1, lon: 259.2 }
+    coord_status: approx_needs_verify
+    size_km: 70
+    cell_m: 200
+  - id: bd_teknaf
+    name: "Teknaf crater (Bangladesh name)"
+    role: bangladesh
+    center: { lat: -36.11, lon: 214.30 }
+    coord_status: verified_gazetteer
+    size_km: 40
+    cell_m: 200
+  - id: bd_ruhea
+    name: "Ruhea crater (Bangladesh name)"
+    role: bangladesh
+    center: { lat: -43.26, lon: 173.08 }
+    coord_status: approx_needs_verify
+    size_km: 35
+    cell_m: 200
+  - id: bd_satkania
+    name: "Satkania crater (Bangladesh name)"
+    role: bangladesh
+    center: { lat: -32.35, lon: 338.20 }
+    coord_status: verified_gazetteer
+    size_km: 25
+    cell_m: 200

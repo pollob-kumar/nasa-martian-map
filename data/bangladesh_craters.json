@@ -1,0 +1,10 @@
+{
+  "note": "Facts checked 2026-10-31. Teknaf & Satkania: USGS Gazetteer feature pages (IDs 16045, 16048). Srīpur: IAU/USGS via Wikipedia (1991, ~22.99 km). Bogra: 1976, 21.3 km. Ruhea: 2016, 9.5 km. Coordinates for Bogra/Sripur/Ruhea are approximate -> verify in the Gazetteer before you show them to judges.",
+  "craters": [
+    {"id": "bd_bogra",   "name": "Bogra",   "diameter_km": 21.3,  "approved": "1976",        "named_after": "Bogra, Bangladesh",    "gazetteer": "https://planetarynames.wr.usgs.gov/"},
+    {"id": "bd_sripur",  "name": "Srīpur",  "diameter_km": 22.99, "approved": "1991",        "named_after": "Sripur, Bangladesh",   "gazetteer": "https://planetarynames.wr.usgs.gov/Feature/5677"},
+    {"id": "bd_teknaf",  "name": "Teknaf",  "diameter_km": 12.0,  "approved": "2022-03-23",  "named_after": "Teknaf, Bangladesh",   "gazetteer": "https://planetarynames.wr.usgs.gov/Feature/16045"},
+    {"id": "bd_ruhea",   "name": "Ruhea",   "diameter_km": 9.5,   "approved": "2016",        "named_after": "Ruhea, Bangladesh",    "gazetteer": "https://planetarynames.wr.usgs.gov/"},
+    {"id": "bd_satkania","name": "Satkania","diameter_km": 6.0,   "approved": "2022-03-23",  "named_after": "Satkania, Bangladesh", "gazetteer": "https://planetarynames.wr.usgs.gov/Feature/16048"}
+  ]
+}

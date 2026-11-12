@@ -313,19 +313,11 @@ export default function App({ regionId = 'demo_synthetic' }: { regionId?: string
       </div>
 
       {nasaHudOn && (
-        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 pointer-events-none flex flex-col items-center">
-          <div className="flex items-center gap-2 px-3.5 py-1 rounded-full bg-slate-950/85 border border-cyan-400/60 shadow-[0_0_20px_rgba(6,182,212,0.4)] backdrop-blur-md">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
-            <span className="font-mono text-[10px] font-bold tracking-widest text-cyan-200">
-              REAL NASA DATA ACTIVE: JEZERO CRATER HiRISE DTM (1.0 m/px)
-            </span>
-            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-              ORBITAL VERIFIED
-            </span>
-          </div>
-          <div className="font-mono text-[9px] text-cyan-300/80 tracking-wider mt-1 drop-shadow-md">
-            CLICK ANYWHERE ON TERRAIN TO PROBE ELEVATION & HAZARDS
-          </div>
+        <div className="absolute top-14 left-1/2 -translate-x-1/2 z-30 pointer-events-none flex items-center gap-2 px-3 py-0.5 rounded-full bg-slate-950/70 border border-cyan-400/40 backdrop-blur-md">
+          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+          <span className="font-mono text-[9px] font-bold tracking-wider text-cyan-200">
+            JEZERO CRATER · NASA HiRISE
+          </span>
         </div>
       )}
 
@@ -373,7 +365,7 @@ export default function App({ regionId = 'demo_synthetic' }: { regionId?: string
       <div className="absolute bottom-20 left-8 z-30 pointer-events-none">
         <div className="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-slate-950/70 backdrop-blur-md border border-cyan-500/20 text-[11px] font-mono text-white/80">
           <span className={`w-2 h-2 rounded-full ${isWalking ? 'bg-emerald-400 animate-ping' : 'bg-cyan-400 animate-pulse'}`} />
-          <span>{!route ? 'NO ROUTE YET — OPEN MAP & ROUTE' : isWalking ? `SIMULATED WALK ×${SIM_SPEEDUP} · ${Math.round(walked)} / ${Math.round(ps.total)} m` : 'DRAG = LOOK · SPACE = WALK (SIMULATED) · M = MAP · 1/2/3 = HUD DETAIL'}</span>
+          <span>{!route ? 'NO ROUTE' : isWalking ? `TRAVERSE · ${Math.round(walked)}/${Math.round(ps.total)} m` : 'SPACE: WALK · DRAG: LOOK'}</span>
         </div>
       </div>
       <div className="absolute bottom-20 right-8 z-30 flex items-center gap-1 rounded-full bg-slate-950/70 backdrop-blur-md border border-white/15 p-1 pointer-events-auto" role="group" aria-label="HUD information level">

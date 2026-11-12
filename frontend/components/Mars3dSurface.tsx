@@ -25,13 +25,13 @@ interface Mars3dSurfaceProps {
 /** Ground height at world (x, z). The terrain mesh, the camera, footprints and every astronaut use THIS function,
  *  so boots always touch the surface (nobody floats or sinks). */
 export function terrainHeight(x: number, z: number): number {
-  const broadSwell = Math.sin(z * 0.005 + x * 0.003) * 1.5;
-  const subtleRoll = Math.cos(z * 0.012 + 0.3) * Math.sin(x * 0.006) * 0.9;
-  const windRipples = Math.sin(z * 0.06 + x * 0.025) * 0.15;
-  const rightRidge = x > 35 ? Math.pow((x - 35) / 12, 1.4) * 0.85 : 0;
+  const broadSwell = Math.sin(z * 0.004 + x * 0.002) * 2.2;
+  const subtleRoll = Math.cos(z * 0.01 + 0.3) * Math.sin(x * 0.005) * 1.2;
+  const windRipples = Math.sin(z * 0.05 + x * 0.02) * 0.18;
+  const craterRim = Math.pow(Math.abs(x) / 75, 1.45) * 0.75;
   const corridorDist = Math.abs(x + z * 0.14);
-  const flatten = Math.min(1, Math.pow(corridorDist / 22, 2));
-  return (broadSwell + subtleRoll + windRipples) * (0.25 + 0.75 * flatten) + rightRidge;
+  const flatten = Math.min(1, Math.pow(corridorDist / 26, 2));
+  return (broadSwell + subtleRoll + windRipples) * (0.3 + 0.7 * flatten) + craterRim;
 }
 
 interface SquadAstronautRig {
@@ -169,41 +169,42 @@ export const Mars3dSurface: React.FC<Mars3dSurfaceProps> = ({
 
     const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
 
-    // 2. Martian Sun & Ambient Planetary Lighting
-    const sunLight = new THREE.DirectionalLight(0xfff3e4, 3.5);
-    sunLight.position.set(-110, 68, -90);
+    // 2. Martian Sun & Ambient Planetary Lighting (Even, natural Martian atmosphere without shadow seams)
+    const sunLight = new THREE.DirectionalLight(0xffecd6, 2.2);
+    sunLight.position.set(-180, 160, -140);
     sunLight.castShadow = true;
     sunLight.shadow.mapSize.width = 2048;
     sunLight.shadow.mapSize.height = 2048;
-    sunLight.shadow.camera.near = 0.5;
-    sunLight.shadow.camera.far = 520;
-    sunLight.shadow.camera.left = -110;
-    sunLight.shadow.camera.right = 110;
-    sunLight.shadow.camera.top = 110;
-    sunLight.shadow.camera.bottom = -110;
-    sunLight.shadow.bias = -0.0002;
-    sunLight.shadow.radius = 1.3;
+    sunLight.shadow.camera.near = 1.0;
+    sunLight.shadow.camera.far = 1400;
+    sunLight.shadow.camera.left = -550;
+    sunLight.shadow.camera.right = 550;
+    sunLight.shadow.camera.top = 550;
+    sunLight.shadow.camera.bottom = -550;
+    sunLight.shadow.bias = -0.0003;
+    sunLight.shadow.radius = 1.2;
     scene.add(sunLight);
 
     // Warm terracotta regolith ground bounce light
-    const ambientLight = new THREE.AmbientLight(0x9a4422, 0.7);
+    const ambientLight = new THREE.AmbientLight(0xb4532a, 1.05);
     scene.add(ambientLight);
 
     // Atmospheric hemisphere gradient: Butterscotch sky to ochre desert floor
-    const hemiLight = new THREE.HemisphereLight(0xdc8660, 0x481908, 0.55);
+    const hemiLight = new THREE.HemisphereLight(0xe08c68, 0x5a2312, 0.7);
     scene.add(hemiLight);
 
     // 3. Texture Loader for NASA Planetary Assets
     const textureLoader = new THREE.TextureLoader();
 
-    // 3.1 Jezero Horizon Texture
-    const horizonTexture = textureLoader.load('/images/jezero_user_map.jpg');
+    // 3.1 Jezero Horizon 360° Panorama
+    const horizonTexture = textureLoader.load('/assets/jezero_landing_site_360.jpg');
     horizonTexture.colorSpace = THREE.SRGBColorSpace;
     horizonTexture.wrapS = THREE.RepeatWrapping;
     horizonTexture.wrapT = THREE.ClampToEdgeWrapping;
-    horizonTexture.repeat.set(2, 1);
+    horizonTexture.repeat.set(1, 1);
+    horizonTexture.anisotropy = maxAnisotropy;
 
-    const skyDomeGeo = new THREE.SphereGeometry(950, 48, 24, 0, Math.PI * 2, 0, Math.PI * 0.52);
+    const skyDomeGeo = new THREE.SphereGeometry(1400, 48, 24, 0, Math.PI * 2, 0, Math.PI * 0.55);
     skyDomeGeo.scale(-1, 1, 1);
     const skyDomeMat = new THREE.MeshBasicMaterial({
       map: horizonTexture,
@@ -211,21 +212,37 @@ export const Mars3dSurface: React.FC<Mars3dSurfaceProps> = ({
       fog: false,
     });
     const skyDomeMesh = new THREE.Mesh(skyDomeGeo, skyDomeMat);
-    skyDomeMesh.position.set(0, -16, 0);
+    skyDomeMesh.position.set(0, -30, 0);
     scene.add(skyDomeMesh);
 
-    // 3.2 Authentic Jezero Crater Real NASA DTM Map Texture
-    const jezeroSoilTexture = textureLoader.load('/images/jezero_user_map.jpg');
+    // 3.2 Authentic Jezero Crater Real NASA Surface Imagery (JezoroCrater.jpg mapped across FULL map)
+    const jezeroSoilTexture = textureLoader.load('/images/JezoroCrater.jpg');
+    // The source is the complete crater view, so do not tile it into a repeating
+    // pattern across the terrain.
     jezeroSoilTexture.wrapS = THREE.ClampToEdgeWrapping;
     jezeroSoilTexture.wrapT = THREE.ClampToEdgeWrapping;
+    jezeroSoilTexture.repeat.set(1, 1);
     jezeroSoilTexture.colorSpace = THREE.SRGBColorSpace;
     jezeroSoilTexture.anisotropy = maxAnisotropy;
 
-    // 3.3 Vast Martian Desert Plain Mesh
-    const terrainWidth = 560;
-    const terrainLength = 1100;
-    const terrainSegmentsX = 160;
-    const terrainSegmentsZ = 280;
+    // Real Mars Surface Rock Textures for boulders and outcrops
+    const rockTexA = textureLoader.load('/assets/mars_surface_rocks_a.jpg');
+    rockTexA.wrapS = THREE.RepeatWrapping;
+    rockTexA.wrapT = THREE.RepeatWrapping;
+    rockTexA.colorSpace = THREE.SRGBColorSpace;
+    rockTexA.anisotropy = maxAnisotropy;
+
+    const rockTexB = textureLoader.load('/assets/mars_surface_rocks_b.jpg');
+    rockTexB.wrapS = THREE.RepeatWrapping;
+    rockTexB.wrapT = THREE.RepeatWrapping;
+    rockTexB.colorSpace = THREE.SRGBColorSpace;
+    rockTexB.anisotropy = maxAnisotropy;
+
+    // 3.3 Vast Martian Desert Plain Mesh with Real Jezero Surface (Full Map 1400m x 1800m)
+    const terrainWidth = 1400;
+    const terrainLength = 1800;
+    const terrainSegmentsX = 180;
+    const terrainSegmentsZ = 240;
     const terrainGeo = new THREE.PlaneGeometry(
       terrainWidth,
       terrainLength,
@@ -233,7 +250,7 @@ export const Mars3dSurface: React.FC<Mars3dSurfaceProps> = ({
       terrainSegmentsZ
     );
     terrainGeo.rotateX(-Math.PI / 2);
-    terrainGeo.translate(0, 0, -420);
+    terrainGeo.translate(0, 0, -600);
 
     const posAttr = terrainGeo.attributes.position;
     for (let i = 0; i < posAttr.count; i++) {
@@ -249,16 +266,16 @@ export const Mars3dSurface: React.FC<Mars3dSurfaceProps> = ({
       map: jezeroSoilTexture,
       bumpMap: jezeroSoilTexture,
       bumpScale: 0.045,
-      roughness: 0.88,
-      metalness: 0.05,
-      color: 0xdf8458, // Warm authentic Martian rust-ochre tint over HiRISE DTM
+      roughness: 0.82,
+      metalness: 0.04,
+      color: 0xffffff, // 100% natural, un-tinted authentic colors of JezoroCrater.jpg
     });
 
     const terrainMesh = new THREE.Mesh(terrainGeo, terrainMat);
     terrainMesh.receiveShadow = true;
     scene.add(terrainMesh);
 
-    // 3.4 Topographic DEM Contour Grid
+    // 3.4 Topographic DEM Contour Grid (Off by default so real Jezero Crater photo is 100% visible)
     const topoGeo = terrainGeo.clone();
     const topoMat = new THREE.MeshBasicMaterial({
       color: 0x06b6d4,
@@ -323,33 +340,11 @@ export const Mars3dSurface: React.FC<Mars3dSurfaceProps> = ({
     scene.add(pebbleInstanced);
 
     // 5. Authentic NASA Landmarks
-    // 5.1 Ancient Rock Formation at ~126m
-    const outcropGroup = new THREE.Group();
-    outcropGroup.position.set(-28, 0, -126);
-    for (let j = 0; j < 5; j++) {
-      const layerGeo = new THREE.BoxGeometry(8 - j * 1.1, 0.85, 5.5 - j * 0.7);
-      const layerMat = new THREE.MeshStandardMaterial({
-        color: j % 2 === 0 ? 0x6e2c14 : 0x7c3217,
-        roughness: 0.94,
-        bumpMap: jezeroSoilTexture,
-        bumpScale: 0.04,
-      });
-      const layerMesh = new THREE.Mesh(layerGeo, layerMat);
-      layerMesh.position.set(0, j * 0.8, 0);
-      layerMesh.rotation.y = 0.25 + j * 0.06;
-      layerMesh.castShadow = true;
-      layerMesh.receiveShadow = true;
-      outcropGroup.add(layerMesh);
-    }
-    scene.add(outcropGroup);
-
     // 5.2 NASA Perseverance Rover at ~243m
     const roverGroup = new THREE.Group();
     roverGroup.position.set(-42, 0.4, -243);
 
-    const roverTex = textureLoader.load(
-      '/images/nasa_perseverance_rover_1790422736238.jpg'
-    );
+    const roverTex = textureLoader.load('/assets/card_first_drive.jpg');
     roverTex.colorSpace = THREE.SRGBColorSpace;
     const roverGeo = new THREE.PlaneGeometry(9, 6.5);
     const roverMat = new THREE.MeshStandardMaterial({
@@ -379,60 +374,6 @@ export const Mars3dSurface: React.FC<Mars3dSurfaceProps> = ({
     roverBeacon.position.set(0, 5.2, 0);
     roverGroup.add(roverBeacon);
     scene.add(roverGroup);
-
-    // 5.3 Subsurface Water Ice Anomaly at ~312m
-    const iceGroup = new THREE.Group();
-    iceGroup.position.set(-52, 0.05, -312);
-    const iceBedGeo = new THREE.PlaneGeometry(10, 8, 16, 16);
-    iceBedGeo.rotateX(-Math.PI / 2);
-    const iceBedMat = new THREE.MeshStandardMaterial({
-      color: 0xa5f3fc,
-      roughness: 0.25,
-      metalness: 0.1,
-      transparent: true,
-      opacity: 0.75,
-    });
-    const iceBed = new THREE.Mesh(iceBedGeo, iceBedMat);
-    iceGroup.add(iceBed);
-    const iceBeacon = new THREE.PointLight(0x67e8f9, 1.8, 20);
-    iceBeacon.position.set(0, 2.5, 0);
-    iceGroup.add(iceBeacon);
-    scene.add(iceGroup);
-
-    // 5.4 Habitat Alpha - Bio-Dome 01 Expedition Base at ~640m
-    const baseGroup = new THREE.Group();
-    baseGroup.position.set(-96, 0, -640);
-    const domeGeo = new THREE.SphereGeometry(24, 32, 24, 0, Math.PI * 2, 0, Math.PI * 0.5);
-    const domeMat = new THREE.MeshStandardMaterial({
-      color: 0xf1f5f9,
-      roughness: 0.25,
-      metalness: 0.85,
-    });
-    const domeMesh = new THREE.Mesh(domeGeo, domeMat);
-    domeMesh.castShadow = true;
-    baseGroup.add(domeMesh);
-
-    for (let s = -1; s <= 1; s += 2) {
-      const solarGeo = new THREE.BoxGeometry(18, 0.4, 9);
-      const solarMat = new THREE.MeshStandardMaterial({
-        color: 0x1e293b,
-        metalness: 0.9,
-        roughness: 0.1,
-      });
-      const solar = new THREE.Mesh(solarGeo, solarMat);
-      solar.position.set(s * 28, 3, 0);
-      solar.rotation.z = s * 0.15;
-      baseGroup.add(solar);
-    }
-    const beaconGeo = new THREE.CylinderGeometry(0.4, 0.6, 14, 12);
-    const beaconMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.8 });
-    const tower = new THREE.Mesh(beaconGeo, beaconMat);
-    tower.position.set(0, 28, 0);
-    baseGroup.add(tower);
-    const baseBeacon = new THREE.PointLight(0x10b981, 4.5, 75);
-    baseBeacon.position.set(0, 35, 0);
-    baseGroup.add(baseBeacon);
-    scene.add(baseGroup);
 
     // 5.5 Probed Target Holographic Laser Beacon
     const probeBeaconGroup = new THREE.Group();
@@ -587,67 +528,58 @@ export const Mars3dSurface: React.FC<Mars3dSurfaceProps> = ({
 
     const nameplateTextures: THREE.Texture[] = [];
 
-    // Helper: Create a 3D Head Nameplate Sprite with the astronaut's name and red triangle arrow pointing down to the helmet
+    // Helper: Create a compact 3D Head Nameplate Sprite with astronaut callsign and small red indicator
     const createAstronautNameplateSprite = (name: string) => {
       const canvas = document.createElement('canvas');
-      canvas.width = 640;
-      canvas.height = 150;
+      canvas.width = 320;
+      canvas.height = 80;
       const ctx = canvas.getContext('2d');
       if (ctx) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        const boxX = 24;
-        const boxY = 12;
-        const boxWidth = 592;
-        const boxHeight = 78;
-        const radius = 16;
+        const boxX = 16;
+        const boxY = 8;
+        const boxWidth = 288;
+        const boxHeight = 44;
+        const radius = 10;
 
-        // Dark slate-glass background with red accent glow
-        ctx.shadowColor = 'rgba(239, 68, 68, 0.55)';
-        ctx.shadowBlur = 12;
-        ctx.fillStyle = 'rgba(6, 12, 24, 0.88)';
+        // Dark slate translucent background
+        ctx.fillStyle = 'rgba(6, 12, 24, 0.72)';
         ctx.beginPath();
         ctx.roundRect(boxX, boxY, boxWidth, boxHeight, radius);
         ctx.fill();
 
-        // Red outer border
-        ctx.shadowBlur = 0;
-        ctx.strokeStyle = 'rgba(239, 68, 68, 0.9)';
-        ctx.lineWidth = 3.5;
+        // Subtle red border
+        ctx.strokeStyle = 'rgba(239, 68, 68, 0.7)';
+        ctx.lineWidth = 1.5;
         ctx.stroke();
 
-        // Pulsing red indicator beacon dot on left
+        // Small indicator dot
         ctx.fillStyle = '#ef4444';
         ctx.beginPath();
-        ctx.arc(boxX + 32, boxY + boxHeight / 2, 8, 0, Math.PI * 2);
+        ctx.arc(boxX + 16, boxY + boxHeight / 2, 4, 0, Math.PI * 2);
         ctx.fill();
 
-        // Astronaut Name Text (bold, crisp, highly visible)
+        // Astronaut Name Text (crisp, compact)
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 28px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace, sans-serif';
+        ctx.font = 'bold 16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(name.toUpperCase(), boxX + boxWidth / 2 + 10, boxY + boxHeight / 2);
+        ctx.fillText(name.toUpperCase(), boxX + boxWidth / 2 + 6, boxY + boxHeight / 2);
 
         // Small Red Triangle Arrow pointing DOWN to the helmet
-        // ("mathar opor red akta soto trangle ar moto arrow diye name gula likhe daw")
         const arrowCenterX = canvas.width / 2;
-        const arrowTopY = boxY + boxHeight + 2;
-        const arrowWidth = 32;
-        const arrowHeight = 22;
+        const arrowTopY = boxY + boxHeight + 1;
+        const arrowWidth = 14;
+        const arrowHeight = 9;
 
-        ctx.fillStyle = '#ef4444'; // Bright Red
+        ctx.fillStyle = '#ef4444';
         ctx.beginPath();
         ctx.moveTo(arrowCenterX - arrowWidth / 2, arrowTopY);
         ctx.lineTo(arrowCenterX + arrowWidth / 2, arrowTopY);
         ctx.lineTo(arrowCenterX, arrowTopY + arrowHeight);
         ctx.closePath();
         ctx.fill();
-
-        // White border on red triangle
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
       }
 
       const texture = new THREE.CanvasTexture(canvas);
@@ -655,11 +587,11 @@ export const Mars3dSurface: React.FC<Mars3dSurfaceProps> = ({
       const spriteMat = new THREE.SpriteMaterial({
         map: texture,
         transparent: true,
-        depthTest: false,
+        depthTest: true,
       });
       const sprite = new THREE.Sprite(spriteMat);
-      sprite.scale.set(2.8, 0.65, 1);
-      sprite.position.set(0, 2.58, 0); // Directly above helmet
+      sprite.scale.set(1.4, 0.35, 1);
+      sprite.position.set(0, 2.35, 0); // Directly above helmet
       return { sprite, texture };
     };
 
@@ -920,11 +852,11 @@ export const Mars3dSurface: React.FC<Mars3dSurfaceProps> = ({
       };
     };
 
-    // 6.2 Primary Player Astronaut Rig (Dr. NAFI UL SHEAK)
+    // 6.2 Primary Player Astronaut Rig (NAFI UL SHEAK)
     const playerRig = buildAstronautRig(
       'player',
-      'Dr. NAFI UL SHEAK',
-      'EVA Expedition Lead',
+      'NAFI UL SHEAK',
+      'EVA Lead',
       0xea580c, // NASA Mars exploration orange
       0.0,
       0.0,
@@ -935,22 +867,22 @@ export const Mars3dSurface: React.FC<Mars3dSurfaceProps> = ({
     // 6.3 3 ASTRONAUT CREWMATES POSITIONED ON THE SIDES (FLANKS)
     // Center line-of-sight is 100% OPEN & CLEAR
     const squadMembers: SquadAstronautRig[] = [
-      // 1. Dr. ATHER ISRAK CHOWDHURY: 5.4m to the LEFT FLANK, 8.5m ahead (Expedition Lead)
+      // 1. ATHER ISRAK: 5.4m to the LEFT FLANK, 8.5m ahead
       buildAstronautRig(
         'crew-vance',
-        'Dr. ATHER ISRAK CHOWDHURY',
-        'Lead Navigator & Expedition Specialist',
+        'ATHER ISRAK',
+        'Navigator',
         0x2563eb, // Royal Blue commander stripes
         -5.4,     // Wide on the LEFT flank
         8.5,      // 8.5 meters ahead
         0.2,
         0x38bdf8
       ),
-      // 2. Dr. POLLOB KUMAR: 5.6m to the RIGHT FLANK, 10.2m ahead (Life Support)
+      // 2. POLLOB KUMAR: 5.6m to the RIGHT FLANK, 10.2m ahead
       buildAstronautRig(
         'crew-patel',
-        'Dr. POLLOB KUMAR',
-        'Life Support & EVA Systems',
+        'POLLOB KUMAR',
+        'Life Support',
         0x06b6d4, // Cyan stripes
         5.6,      // Wide on the RIGHT flank
         10.2,     // 10.2 meters ahead
@@ -958,22 +890,22 @@ export const Mars3dSurface: React.FC<Mars3dSurfaceProps> = ({
         0x06b6d4,
         true      // Comms antenna
       ),
-      // 3. Dr. JAMIUL ISLAM SUNNY: 8.2m to the FAR LEFT FLANK, 19.5m ahead (Field Geologist)
+      // 3. JAMIUL SUNNY: 8.2m to the FAR LEFT FLANK, 19.5m ahead
       buildAstronautRig(
         'crew-chen',
-        'Dr. JAMIUL ISLAM SUNNY',
-        'Astrobiology & Mineralogy Specialist',
+        'JAMIUL SUNNY',
+        'Geologist',
         0xd97706, // Amber field geologist stripes
         -8.2,     // Ahead on the FAR LEFT ridge
         19.5,     // 19.5 meters ahead
         1.1,
         0xf59e0b
       ),
-      // 4. Field medic & safety: far right, further back (keeps the group spread out, not bunched)
+      // 4. Field medic & safety
       buildAstronautRig(
         'crew-safety',
-        'Crew 4 · Field Medic',
-        'Medical & Safety',
+        'FIELD MEDIC',
+        'Medic',
         0x16a34a, // Green safety stripes
         9.0,
         14.5,
@@ -1276,18 +1208,12 @@ export const Mars3dSurface: React.FC<Mars3dSurfaceProps> = ({
         onAltitudeChange(currentEyeAlt);
       }
 
-      // 10.5 Topographic Contour Grid & NASA Data Mode Styling
-      if (state.nasaDataMode) {
-        topoMat.opacity = 0.55;
-        topoMat.color.setHex(0x06b6d4);
-        terrainMat.bumpScale = 0.085;
-        terrainMat.roughness = 0.72;
-      } else {
-        topoMat.opacity = state.showTopoGrid ? 0.4 : 0.0;
-        topoMat.color.setHex(0x06b6d4);
-        terrainMat.bumpScale = 0.045;
-        terrainMat.roughness = 0.88;
-      }
+      // 10.5 Topographic Contour Grid
+      // Off by default so real photographic JezeroCrater surface is 100% visible and authentic
+      topoMat.opacity = state.showTopoGrid ? 0.18 : 0.0;
+      topoMat.color.setHex(0x06b6d4);
+      terrainMat.bumpScale = 0.045;
+      terrainMat.roughness = 0.82;
 
       // 10.5b Probed Target Laser Beacon Animation
       if (state.probeTarget) {
@@ -1317,10 +1243,11 @@ export const Mars3dSurface: React.FC<Mars3dSurfaceProps> = ({
         skyColor = 0xa16207;
         exposure = 1.05;
       } else if (state.timeOfSol === 'noon') {
-        sunLight.position.set(-110, 68, -90);
-        sunLight.color.setHex(0xfff3e4);
-        sunIntensity = 3.5;
-        ambientColor = 0x9a4422;
+        sunLight.position.set(camera.position.x - 180, 160, camera.position.z - 140);
+        sunLight.target.position.set(camera.position.x, 0, camera.position.z);
+        sunLight.color.setHex(0xffecd6);
+        sunIntensity = 2.2;
+        ambientColor = 0xb4532a;
         skyColor = 0xc2714c;
         exposure = 1.15;
       } else if (state.timeOfSol === 'golden') {
@@ -1370,9 +1297,7 @@ export const Mars3dSurface: React.FC<Mars3dSurfaceProps> = ({
       dustGeo.attributes.position.needsUpdate = true;
 
       // 10.8 Landmark Beacons
-      baseBeacon.intensity = 4.0 + Math.sin(time * 3.5) * 1.8;
       roverBeacon.intensity = 2.2 + Math.sin(time * 4.5) * 1.2;
-      iceBeacon.intensity = 1.6 + Math.sin(time * 2.5) * 0.8;
 
       renderer.render(scene, camera);
     };
@@ -1456,12 +1381,6 @@ export const Mars3dSurface: React.FC<Mars3dSurfaceProps> = ({
       roverTex.dispose();
       chassisGeo.dispose();
       chassisMat.dispose();
-      iceBedGeo.dispose();
-      iceBedMat.dispose();
-      domeGeo.dispose();
-      domeMat.dispose();
-      beaconGeo.dispose();
-      beaconMat.dispose();
       dustGeo.dispose();
       dustMat.dispose();
       torsoChestGeo.dispose();
